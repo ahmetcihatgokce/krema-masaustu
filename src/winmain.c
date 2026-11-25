@@ -365,8 +365,15 @@ static int run(void)
     }
     return result<0 ? 1 : 0;
 }
+#ifdef KREMA_LOCAL_ABI
 void WINAPI WinMainCRTStartup(void)
+#else
+int WINAPI wWinMain(HINSTANCE instance,HINSTANCE previous,PWSTR command_line,int show)
+#endif
 {
+#ifndef KREMA_LOCAL_ABI
+    (void)instance; (void)previous; (void)command_line; (void)show;
+#endif
     int result=run();
     if (app.dc) {
         if (app.stock_bitmap)SelectObject(app.dc,app.stock_bitmap);
@@ -375,5 +382,9 @@ void WINAPI WinMainCRTStartup(void)
     }
     if (app.touch_map) HeapFree(GetProcessHeap(),0,app.touch_map);
     if (app.mutex)CloseHandle(app.mutex);
+#ifdef KREMA_LOCAL_ABI
     ExitProcess((UINT)result);
+#else
+    return result;
+#endif
 }

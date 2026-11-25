@@ -2,7 +2,7 @@
 
 Krema, Pativukat’ın mavi gözlü, kıvrık kulaklı kedisi. Windows masaüstünde patisini fareyle oynatır, yazarken küçük klavyesine dokunur. Başını okşayınca gözlerini kısar ve elinize doğru eğilir. Krema miyavlayamıyor. Sevildiğinde çıkardığı sesi en iyi “ıh ıhh” diye tarif edebiliyoruz.
 
-[Windows 11 için indir (ZIP, 64 bit)](https://github.com/ahmetcihatgokce/krema-masaustu/raw/refs/heads/main/indir/Krema-Masaustu-Windows.zip) · [acgokce](https://acgokce.vercel.app/windows) · [Pativukat Uygulamalar](https://pativukat.com/uygulama#krema-masaustu)
+[Windows 11 için indir (ZIP, 64 bit)](https://github.com/ahmetcihatgokce/krema-masaustu/raw/refs/heads/main/indir/Krema-Masaustu-Windows.zip) · [Sesli önizlemeyi indir](https://github.com/ahmetcihatgokce/krema-masaustu/raw/refs/heads/main/onizleme/Krema-Hareket-Onizleme.mp4) · [acgokce](https://acgokce.vercel.app/windows) · [Pativukat Uygulamalar](https://pativukat.com/uygulama#krema-masaustu)
 
 <img src="media/krema-fotograf.jpg" alt="Gerçek Krema’nın mavi gözlerini, kıvrık kulaklarını ve pembe tasmasını gösteren fotoğraf" width="235">
 
