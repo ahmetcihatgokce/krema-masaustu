@@ -6,7 +6,7 @@ jobs:
   windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: msys2/setup-msys2@v2
         with:
           msystem: MINGW64
@@ -22,27 +22,60 @@ jobs:
           Add-Type -TypeDefinition @'
           using System;
           using System.Runtime.InteropServices;
+          using System.Text;
+          using System.Collections.Generic;
           public class KremaWindow {
             [DllImport("user32.dll", CharSet=CharSet.Unicode)]
-            public static extern IntPtr FindWindow(string className, string windowName);
+            public static extern IntPtr FindWindow(string className, IntPtr windowName);
+            private delegate bool Walk(IntPtr window, IntPtr param);
+            [DllImport("user32.dll")] private static extern bool EnumWindows(Walk callback, IntPtr param);
+            [DllImport("user32.dll")] private static extern bool EnumChildWindows(IntPtr parent, Walk callback, IntPtr param);
+            [DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(IntPtr window, out uint pid);
+            [DllImport("user32.dll", CharSet=CharSet.Unicode)] private static extern int GetClassName(IntPtr w, StringBuilder name, int max);
+            [DllImport("user32.dll", CharSet=CharSet.Unicode)] private static extern int GetWindowText(IntPtr w, StringBuilder title, int max);
+            private static string Describe(IntPtr w) {
+              var kind = new StringBuilder(128); var title = new StringBuilder(256);
+              GetClassName(w, kind, 128); GetWindowText(w, title, 256);
+              return kind + " [" + title + "] visible=" + IsWindowVisible(w);
+            }
+            public static string Windows(uint pid) {
+              var result = new List<string>();
+              EnumWindows((w,p) => {
+                uint owner; GetWindowThreadProcessId(w,out owner);
+                if (owner == pid) {
+                  result.Add(Describe(w));
+                  EnumChildWindows(w,(child,q) => { result.Add(Describe(child)); return true; },IntPtr.Zero);
+                }
+                return true;
+              },IntPtr.Zero);
+              return String.Join(" | ",result);
+            }
             [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hwnd);
             [DllImport("user32.dll")] public static extern bool PostMessage(IntPtr hwnd, uint message, IntPtr wp, IntPtr lp);
           }
           '@
+          $issues = @()
           foreach ($binary in @("./Krema.exe", "./package/Krema.exe")) {
             $p = Start-Process -FilePath $binary -PassThru
             try {
               $limit = (Get-Date).AddSeconds(12)
               do {
                 Start-Sleep -Milliseconds 200
-                $window = [KremaWindow]::FindWindow("Pativukat.Krema.Desktop.3", $null)
+                $window = [KremaWindow]::FindWindow("Pativukat.Krema.Desktop.3", [IntPtr]::Zero)
                 $ready = $window -ne [IntPtr]::Zero -and [KremaWindow]::IsWindowVisible($window)
               } until ($ready -or $p.HasExited -or (Get-Date) -gt $limit)
-              if (!$ready -or $p.HasExited) { throw "Masaüstü penceresi açılamadı ($binary)" }
+              if (!$ready -or $p.HasExited) {
+                $state = if ($p.HasExited) { "exit=$($p.ExitCode)" } else { [KremaWindow]::Windows($p.Id) }
+                throw "Masaüstü penceresi açılamadı ($binary) $state"
+              }
+              Write-Host "Açıldı $binary"
               [void][KremaWindow]::PostMessage($window, 0x10, [IntPtr]::Zero, [IntPtr]::Zero)
               if (!$p.WaitForExit(5000) -or $p.ExitCode -ne 0) { throw "Krema kapanamadı ($binary)" }
+            } catch {
+              $issues += $_.Exception.Message
             } finally {
               if (!$p.HasExited) { $p.Kill() }
               $p.Dispose()
             }
           }
+          if ($issues.Count) { throw ($issues -join " / ") }
