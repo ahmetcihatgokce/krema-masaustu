@@ -1,0 +1,48 @@
+name: Windows doğrulaması
+on: [push, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: false
+          install: make mingw-w64-x86_64-gcc mingw-w64-x86_64-python mingw-w64-x86_64-python-pillow
+      - name: Kaynakları derle ve etkileşimleri doğrula
+        shell: msys2 {0}
+        run: make PREFIX= && make PREFIX= test
+      - name: Derlenen ve dağıtılan uygulamaların masaüstü pencerelerini aç
+        shell: pwsh
+        run: |
+          Expand-Archive -Path indir/Krema-Masaustu-Windows.zip -DestinationPath package
+          Add-Type -TypeDefinition @'
+          using System;
+          using System.Runtime.InteropServices;
+          public class KremaWindow {
+            [DllImport("user32.dll", CharSet=CharSet.Unicode)]
+            public static extern IntPtr FindWindow(string className, string windowName);
+            [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hwnd);
+            [DllImport("user32.dll")] public static extern bool PostMessage(IntPtr hwnd, uint message, IntPtr wp, IntPtr lp);
+          }
+          '@
+          foreach ($binary in @("./Krema.exe", "./package/Krema.exe")) {
+            $p = Start-Process -FilePath $binary -PassThru
+            try {
+              $limit = (Get-Date).AddSeconds(12)
+              do {
+                Start-Sleep -Milliseconds 200
+                $window = [KremaWindow]::FindWindow("Pativukat.Krema.Desktop.3", $null)
+                $ready = $window -ne [IntPtr]::Zero -and [KremaWindow]::IsWindowVisible($window)
+              } until ($ready -or $p.HasExited -or (Get-Date) -gt $limit)
+              if (!$ready -or $p.HasExited) { throw "Masaüstü penceresi açılamadı ($binary)" }
+              [void][KremaWindow]::PostMessage($window, 0x10, [IntPtr]::Zero, [IntPtr]::Zero)
+              if (!$p.WaitForExit(5000) -or $p.ExitCode -ne 0) { throw "Krema kapanamadı ($binary)" }
+            } finally {
+              if (!$p.HasExited) { $p.Kill() }
+              $p.Dispose()
+            }
+          }

@@ -1,0 +1,7 @@
+/assets/
+/build/
+/Krema.exe
+/Krema.res.o
+/interactions.exe
+/src/media_data.h
+__pycache__/

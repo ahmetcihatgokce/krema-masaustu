@@ -1,0 +1,15 @@
+Krema Masaüstü 0.3.0 • Windows 11 (64 bit)
+
+ZIP’i çıkar, Krema.exe’yi aç. Krema ekranın sağ alt köşesinde seni bekler.
+
+Başının üzerinde imleci tıklamadan yavaşça gezdir. Krema başını sana doğru uzatır, gözlerini kısar ve aralıklarla kendi “ıh ıhh” sesini çıkarır. Yanına ya da arkasına dokununca tıslar. 25 saniye fareyi ve klavyeyi kullanmazsan uykuya dalar. Uyanınca uyku sesi durur.
+
+Sol tuşla tutup sürükleyerek taşı. Sağ tık menüsünden “İmlecin peşinden yürü”, “Sesi kapat”, “Köşeye taşı”, “Krema’yı gizle” ve “Çıkış” seçeneklerine ulaşabilirsin. Gizlersen bildirim alanındaki Krema simgesinden tekrar gösterebilirsin.
+
+Okşama, tıslama ve uyku sesleri gerçek Krema’nın kayıtlarıdır. Canlandırmalar sahibinin çektiği gerçek fotoğraflardan hazırlanmıştır.
+
+Kaynak kodu, fotoğraf, sesler ve kendi kedine uyarlama rehberi
+https://github.com/ahmetcihatgokce/krema-masaustu
+
+acgokce • https://acgokce.vercel.app/windows
+Pativukat • https://pativukat.com/uygulama#krema-masaustu
